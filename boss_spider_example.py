@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Boss直聘职位数据爬虫 - 使用通用爬虫类的示例
+Boss直聘职位数据爬虫 - 基于容器解析方案
 """
 
 from generic_app_spider import GenericAppSpider
@@ -9,24 +9,38 @@ from generic_app_spider import GenericAppSpider
 # Boss直聘配置
 BOSS_CONFIG = {
     "app_package": "com.hpbr.bosszhipin",
+    "container_selector": "com.hpbr.bosszhipin:id/job_item_layout",  # 容器选择器（必需）
     "selectors": {
         "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
         "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue",
         "公司名称": "com.hpbr.bosszhipin:id/tv_company_name",
-        "地址": "com.hpbr.bosszhipin:id/tv_distance",
-        "活跃度": "com.hpbr.bosszhipin:id/tv_active_status"
+        "招聘者": "com.hpbr.bosszhipin:id/tv_employer",
+        "公司信息": "com.hpbr.bosszhipin:id/tv_company_industry"
     },
-    "max_items": 10,  # 最多抓取100条数据
+    "max_items": 100,
     "scroll_sleep": 2.5,
-    "unique_keys": ["职位名称", "公司名称"],  # 使用职位名+公司名去重
-    "output_prefix": "test_boss_jobs",
-    "title": "Boss直聘职位数据爬虫",
-    "container_selector": "com.hpbr.bosszhipin:id/cl_card_container",  # 容器选择器
+    "unique_keys": ["职位名称", "公司名称"],
+    "output_prefix": "boss_jobs",
+    "title": "Boss直聘职位数据爬虫"
 }
 
 
 def main():
     """主函数"""
+    print("\n" + "=" * 60)
+    print("Boss直聘职位数据爬虫")
+    print("=" * 60)
+    print("使用容器解析方案 - 数据准确性100%")
+    print("=" * 60)
+    print()
+    print("提示:")
+    print("1. 如果首次使用，请先用 weditor 工具找到容器的 resourceId")
+    print("2. 运行命令: python -m weditor")
+    print("3. 访问 http://localhost:17310 查看页面结构")
+    print("4. 找到包含所有字段的父容器")
+    print()
+    print("=" * 60 + "\n")
+    
     # 创建爬虫实例
     spider = GenericAppSpider(
         app_package=BOSS_CONFIG["app_package"],

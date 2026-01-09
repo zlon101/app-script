@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 """
 通用爬虫高级使用示例
-展示回调函数、数据处理等高级功能
+展示回调函数、数据处理等高级功能 - v4.0
 """
+
+import sys
+sys.path.insert(0, '..')
 
 import time
 from typing import List, Dict, Any
@@ -11,6 +14,10 @@ from generic_app_spider import GenericAppSpider
 from rich.console import Console
 
 console = Console()
+
+
+# Boss直聘容器配置（所有示例通用）
+CONTAINER_SELECTOR = "com.hpbr.bosszhipin:id/job_item_layout"
 
 
 # ==================== 示例1: 使用回调函数 ====================
@@ -31,21 +38,21 @@ def example_with_callbacks():
             for item in items[:2]:  # 显示前2条数据
                 console.print(f"  - {item}")
     
-    config = {
-        "app_package": "com.hpbr.bosszhipin",
-        "selectors": {
+    spider = GenericAppSpider(
+        app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,
+        selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue",
             "公司名称": "com.hpbr.bosszhipin:id/tv_company_name"
         },
-        "max_items": 50,  # 抓取50条数据
-        "scroll_sleep": 2.0,
-        "unique_keys": ["职位名称", "公司名称"],
-        "output_prefix": "boss_jobs_with_callbacks",
-        "title": "带回调的Boss直聘爬虫"
-    }
+        max_items=50,
+        scroll_sleep=2.0,
+        unique_keys=["职位名称", "公司名称"],
+        output_prefix="boss_jobs_with_callbacks",
+        title="带回调的Boss直聘爬虫"
+    )
     
-    spider = GenericAppSpider(**config)
     spider.run(before_parse=before_parse, after_parse=after_parse)
 
 
@@ -88,19 +95,19 @@ class CustomScrollSpider(GenericAppSpider):
 
 def example_custom_scroll():
     """演示自定义滚动策略"""
-    config = {
-        "app_package": "com.hpbr.bosszhipin",
-        "selectors": {
+    spider = CustomScrollSpider(
+        app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,
+        selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue"
         },
-        "max_items": 80,  # 抓取80条数据
-        "scroll_sleep": 2.0,
-        "output_prefix": "boss_custom_scroll",
-        "title": "自定义滚动策略爬虫"
-    }
+        max_items=80,
+        scroll_sleep=2.0,
+        output_prefix="boss_custom_scroll",
+        title="自定义滚动策略爬虫"
+    )
     
-    spider = CustomScrollSpider(**config)
     spider.run()
 
 
@@ -108,20 +115,20 @@ def example_custom_scroll():
 def example_data_processing():
     """演示数据获取后的处理"""
     
-    config = {
-        "app_package": "com.hpbr.bosszhipin",
-        "selectors": {
+    spider = GenericAppSpider(
+        app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,
+        selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue",
             "公司名称": "com.hpbr.bosszhipin:id/tv_company_name"
         },
-        "max_items": 50,  # 抓取50条数据
-        "scroll_sleep": 2.0,
-        "output_prefix": "boss_processed",
-        "title": "数据处理示例爬虫"
-    }
+        max_items=50,
+        scroll_sleep=2.0,
+        output_prefix="boss_processed",
+        title="数据处理示例爬虫"
+    )
     
-    spider = GenericAppSpider(**config)
     spider.run()
     
     # 获取数据进行处理
@@ -157,6 +164,7 @@ def example_minimal_config():
     
     spider = GenericAppSpider(
         app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,  # 必需
         selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资": "com.hpbr.bosszhipin:id/tv_salary_statue"
@@ -173,6 +181,7 @@ def example_full_config():
     
     spider = GenericAppSpider(
         app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,
         selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue",
@@ -180,12 +189,12 @@ def example_full_config():
             "招聘者": "com.hpbr.bosszhipin:id/tv_employer",
             "公司信息": "com.hpbr.bosszhipin:id/tv_company_industry"
         },
-        max_items=150,                                    # 抓取150条数据
-        scroll_sleep=3.0,                                # 每次滚动后等待3秒
-        unique_keys=["职位名称", "公司名称"],              # 组合去重
-        output_prefix="boss_jobs_full",                  # 输出文件前缀
-        title="Boss直聘完整配置爬虫",                     # 显示标题
-        max_empty_scrolls=5                              # 连续5次无数据停止
+        max_items=150,
+        scroll_sleep=3.0,
+        unique_keys=["职位名称", "公司名称"],
+        output_prefix="boss_jobs_full",
+        title="Boss直聘完整配置爬虫",
+        max_empty_scrolls=5
     )
     
     spider.run()
@@ -197,14 +206,15 @@ def example_smart_stop():
     
     spider = GenericAppSpider(
         app_package="com.hpbr.bosszhipin",
+        container_selector=CONTAINER_SELECTOR,
         selectors={
             "职位名称": "com.hpbr.bosszhipin:id/tv_position_name",
             "薪资待遇": "com.hpbr.bosszhipin:id/tv_salary_statue",
             "公司名称": "com.hpbr.bosszhipin:id/tv_company_name"
         },
-        max_items=1000,                    # 设置一个很大的值
+        max_items=1000,
         scroll_sleep=2.0,
-        max_empty_scrolls=3,               # 连续3次无数据就停止
+        max_empty_scrolls=3,
         output_prefix="boss_smart_stop",
         title="智能停止示例"
     )
@@ -216,7 +226,7 @@ def example_smart_stop():
 def main():
     """主函数"""
     print("\n" + "=" * 60)
-    print("通用爬虫高级使用示例")
+    print("通用爬虫高级使用示例 (v4.0 - 纯容器解析)")
     print("=" * 60)
     print("1. 使用回调函数")
     print("2. 自定义滚动策略")
